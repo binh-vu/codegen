@@ -1,0 +1,16 @@
+{
+	"resources": [
+		{	"id": "default", "type": "csv" }
+	],
+	"attrs": [
+		{ "name": "id", "resource": "default", "path": [[1, null], 0] },
+		{ "name": "name", "resource": "default", "path": [[1, null], 1] }
+	],
+	"subj": "id",
+	"props": {
+		"rdfs:label": "name"
+	},
+	"alignments": [
+		{ "source": "id", "target": "name", "dims": [[0, 0]]}
+	]
+}
