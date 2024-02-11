@@ -76,6 +76,9 @@ class PredefinedFn:
     class range(Expr):
         start: Expr
         end: Expr
+        step: Optional[Expr] = None
 
         def to_python(self):
+            if self.step is not None:
+                return f"range({self.start.to_python()}, {self.end.to_python()}, {self.step.to_python()})"
             return f"range({self.start.to_python()}, {self.end.to_python()})"

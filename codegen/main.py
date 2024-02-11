@@ -1,9 +1,10 @@
 import json
 
-from codegen.models import AST, Memory, PredefinedFn, Var, expr
 from drepr.prelude import Alignment, BaseWriter, DRepr
 from drepr.varspace import VarSpace
 from drepr.writers import TTLWriter
+
+from codegen.models import AST, Memory, PredefinedFn, Var, expr
 
 with open("./data.json", "r") as f:
     dmod = DRepr.from_dict(json.load(f))

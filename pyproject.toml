@@ -5,7 +5,7 @@ description = "Meta-programming"
 authors = ["Binh Vu <binh@toan2.com>"]
 license = "MIT"
 readme = "README.md"
-include = ["coge"]
+packages = [{ include = "codegen" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"

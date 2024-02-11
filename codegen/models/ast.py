@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Callable
+from typing import Any, Callable, Optional
 
 from codegen.models.expr import Expr
 from codegen.models.mem import Var
@@ -10,6 +10,7 @@ from codegen.models.statement import (
     Comment,
     DefFuncStatement,
     ForLoopStatement,
+    ImportStatement,
     LineBreak,
     NoStatement,
     SingleExprStatement,
@@ -26,6 +27,11 @@ class AST:
     @staticmethod
     def root():
         return AST("root", NoStatement())
+
+    def import_(self, module: str):
+        self.children.append(
+            AST(self.id + "_" + str(len(self.children)), ImportStatement(module))
+        )
 
     def linebreak(self):
         self.children.append(AST(self.id + "_" + str(len(self.children)), LineBreak()))
@@ -62,16 +68,17 @@ class AST:
         self.children.append(tree)
         return tree
 
-    def seq_stmts(self, iterfn: Callable, obj):
-        it = iterfn(self, obj, 0)
-        if it is None:
-            return
-        while True:
-            prog, obj, index = it
-            it = iterfn(prog, obj, index)
-            if it is None:
-                break
-        return prog
+    def update_recursively(
+        self, fn: Callable[[AST, Any], tuple[AST, Any, bool]], context: Any
+    ):
+        """Recursively updating the ast. It takes a function that works on the current tree and a context, returns a tuple of
+        (new_tree, new_context, stop). This function returns the last AST that is updated.
+        """
+        ast = self
+        stop = False
+        while not stop:
+            ast, context, stop = fn(ast, context)
+        return ast
 
     def nested_stmts(self, func: Callable, obj) -> tuple[AST, list[list[Var]]]:
         genvars = []

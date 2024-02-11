@@ -33,6 +33,17 @@ class LineBreak(Statement):
 
 
 @dataclass
+class ImportStatement(Statement):
+    module: str
+
+    def to_python(self):
+        if self.module.find(".") != -1:
+            module, attr = self.module.rsplit(".", 1)
+            return f"from {module} import {attr}"
+        return f"import {self.module}"
+
+
+@dataclass
 class DefFuncStatement(Statement):
     name: str
     args: list[Var] = field(default_factory=list)
