@@ -3,8 +3,9 @@ from __future__ import annotations
 import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Any, Optional
 
-from codegen.models.mem import Var
+from codegen.models.memory import Var
 
 
 class Expr(ABC):
@@ -15,10 +16,36 @@ class Expr(ABC):
 
 @dataclass
 class ExprConstant(Expr):
-    constant: str | int | bool | float
+    constant: Any
 
     def to_python(self):
-        return json.dumps(self.constant)
+        return ExprConstant.constant_to_python(self.constant)
+
+    @staticmethod
+    def constant_to_python(val: Any):
+        if isinstance(val, bool) or val is None:
+            return str(val)
+        if isinstance(val, (str, int, float)):
+            return json.dumps(val)
+        if isinstance(val, list):
+            return (
+                "[" + ", ".join([ExprConstant.constant_to_python(v) for v in val]) + "]"
+            )
+        if isinstance(val, dict):
+            return (
+                "{"
+                + ", ".join(
+                    [
+                        f"{ExprConstant.constant_to_python(k)}: {ExprConstant.constant_to_python(v)}"
+                        for k, v in val.items()
+                    ]
+                )
+                + "}"
+            )
+        if isinstance(val, set):
+            return (
+                "{" + ", ".join([ExprConstant.constant_to_python(v) for v in val]) + "}"
+            )
 
 
 @dataclass
@@ -53,6 +80,8 @@ class ExprMethodCall(Expr):
     args: list[Expr]
 
     def to_python(self):
+        if self.method == "__contains__" and len(self.args) == 1:
+            return f"{self.args[0].to_python()} in {self.object.to_python()}"
         return f"{self.object.to_python()}.{self.method}({', '.join([arg.to_python() for arg in self.args])})"
 
 
@@ -82,3 +111,26 @@ class PredefinedFn:
             if self.step is not None:
                 return f"range({self.start.to_python()}, {self.end.to_python()}, {self.step.to_python()})"
             return f"range({self.start.to_python()}, {self.end.to_python()})"
+
+    @dataclass
+    class set_contains(Expr):
+        set_: Expr
+        item: Expr
+
+        def to_python(self):
+            return f"({self.item.to_python()}) in {self.set_.to_python()}"
+
+    @dataclass
+    class bool_neg(Expr):
+        condition: Expr
+
+        def to_python(self):
+            return f"not {self.condition.to_python()}"
+
+    @dataclass
+    class list_append(Expr):
+        lst: Expr
+        item: Expr
+
+        def to_python(self):
+            return f"{self.lst.to_python()}.append({self.item.to_python()})"

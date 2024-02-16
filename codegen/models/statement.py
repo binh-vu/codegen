@@ -1,15 +1,10 @@
 from __future__ import annotations
 
-import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Callable, Literal
-
-import pandas as pd
 
 from codegen.models.expr import Expr
-from codegen.models.mem import Var
+from codegen.models.memory import Var
 
 
 class Statement(ABC):
@@ -76,6 +71,40 @@ class ForLoopStatement(Statement):
 
     def to_python(self):
         return f"for {self.item.get_name()} in {self.iter.to_python()}:"
+
+
+@dataclass
+class ContinueStatement(Statement):
+    def to_python(self):
+        return "continue"
+
+
+@dataclass
+class BreakStatement(Statement):
+    def to_python(self):
+        return "break"
+
+
+@dataclass
+class ReturnStatement(Statement):
+    expr: Expr
+
+    def to_python(self):
+        return f"return {self.expr.to_python()}"
+
+
+@dataclass
+class IfStatement(Statement):
+    cond: Expr
+
+    def to_python(self):
+        return f"if {self.cond.to_python()}:"
+
+
+@dataclass
+class ElseStatement(Statement):
+    def to_python(self):
+        return "else:"
 
 
 @dataclass
