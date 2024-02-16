@@ -85,6 +85,32 @@ class ExprMethodCall(Expr):
         return f"{self.object.to_python()}.{self.method}({', '.join([arg.to_python() for arg in self.args])})"
 
 
+@dataclass
+class ExprNotEqual(Expr):
+    left: Expr
+    right: Expr
+
+    def to_python(self):
+        return f"{self.left.to_python()} != {self.right.to_python()}"
+
+
+@dataclass
+class ExprEqual(Expr):
+    left: Expr
+    right: Expr
+
+    def to_python(self):
+        return f"{self.left.to_python()} == {self.right.to_python()}"
+
+
+@dataclass
+class ExprNegation(Expr):
+    expr: Expr
+
+    def to_python(self):
+        return f"not {self.expr.to_python()}"
+
+
 class PredefinedFn:
     @dataclass
     class item_getter(Expr):
@@ -119,13 +145,6 @@ class PredefinedFn:
 
         def to_python(self):
             return f"({self.item.to_python()}) in {self.set_.to_python()}"
-
-    @dataclass
-    class bool_neg(Expr):
-        condition: Expr
-
-        def to_python(self):
-            return f"not {self.condition.to_python()}"
 
     @dataclass
     class list_append(Expr):
