@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
-from codegen.models.expr import Expr
+from codegen.models.expr import ExceptionExpr, Expr
 from codegen.models.memory import Var
 
 
@@ -19,7 +19,19 @@ class NoStatement(Statement):
         return "NoStatement()"
 
     def to_python(self):
-        return ""
+        return "pass"
+
+
+@dataclass
+class BlockStatement(Statement):
+    """A placeholder for a block of statements. It is used to group multiple same-level statements together."""
+
+    stmts: list[Statement] = field(default_factory=list)
+
+    def to_python(self):
+        raise Exception(
+            "BlockStatement won't provide the implementation. Users should invoke the implementation of each inner statement directly."
+        )
 
 
 class LineBreak(Statement):
@@ -62,6 +74,14 @@ class SingleExprStatement(Statement):
 
     def to_python(self):
         return self.expr.to_python()
+
+
+@dataclass
+class ExceptionStatement(Statement):
+    expr: ExceptionExpr  # we rely on special exception expr
+
+    def to_python(self):
+        return "raise " + self.expr.to_python()
 
 
 @dataclass

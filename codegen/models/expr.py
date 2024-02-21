@@ -14,6 +14,10 @@ class Expr(ABC):
         raise NotImplementedError()
 
 
+class ExceptionExpr(Expr):
+    pass
+
+
 @dataclass
 class ExprConstant(Expr):
     constant: Any
@@ -95,6 +99,15 @@ class ExprNotEqual(Expr):
 
 
 @dataclass
+class ExprLessThanOrEqual(Expr):
+    left: Expr
+    right: Expr
+
+    def to_python(self):
+        return f"{self.left.to_python()} < {self.right.to_python()}"
+
+
+@dataclass
 class ExprEqual(Expr):
     left: Expr
     right: Expr
@@ -153,3 +166,25 @@ class PredefinedFn:
 
         def to_python(self):
             return f"{self.lst.to_python()}.append({self.item.to_python()})"
+
+    @dataclass
+    class has_item(Expr):
+        collection: Expr
+        item: Expr
+
+        def to_python(self):
+            return f"({self.item.to_python()}) in {self.collection.to_python()}"
+
+    @dataclass
+    class base_error(ExceptionExpr):
+        msg: str
+
+        def to_python(self):
+            return f"Exception('{self.msg}')"
+
+    @dataclass
+    class key_error(ExceptionExpr):
+        msg: str
+
+        def to_python(self):
+            return f"KeyError('{self.msg}')"

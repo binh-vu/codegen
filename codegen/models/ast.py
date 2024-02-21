@@ -3,13 +3,16 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
-from codegen.models.expr import Expr
+from codegen.models.expr import ExceptionExpr, Expr
 from codegen.models.memory import Memory, Var, VarScope
 from codegen.models.statement import (
     AssignStatement,
+    BlockStatement,
     Comment,
+    ContinueStatement,
     DefFuncStatement,
     ElseStatement,
+    ExceptionStatement,
     ForLoopStatement,
     IfStatement,
     ImportStatement,
@@ -35,15 +38,23 @@ class AST:
     def root():
         return AST("root", NoStatement())
 
-    def __call__(self, *args: Callable[[AST], Any] | Statement):
+    def __call__(
+        self, *args: Callable[[AST], Any] | Statement, return_self: bool = False
+    ) -> Optional[AST]:
         """Allow to build the graph hierarchically"""
+        return_val = None
+
         for fn in args:
             if isinstance(fn, Statement):
                 self._add_stmt(fn)
             else:
                 assert callable(fn)
-                fn(self)
-        return self
+                return_val = fn(self)
+
+        if return_self:
+            assert return_val is None, "Trying to return multiple asts at the same time"
+            return self
+        return return_val
 
     def freeze(self):
         self._is_frozen = True
@@ -66,7 +77,10 @@ class AST:
         return self._add_stmt(DefFuncStatement(name, vars))
 
     def expr(self, expr: Expr):
-        self._add_stmt(SingleExprStatement(expr))
+        return self._add_stmt(SingleExprStatement(expr))
+
+    def raise_exception(self, expr: ExceptionExpr):
+        return self._add_stmt(ExceptionStatement(expr))
 
     def assign(self, mem: Memory, var: Var, expr: Expr):
         scope = self.next_var_scope()
@@ -107,7 +121,11 @@ class AST:
                 ]
             )
 
-        prog = ["\t" * level + self.stmt.to_python()]
+        if isinstance(self.stmt, BlockStatement):
+            prog = ["\t" * level + stmt.to_python() + "\n" for stmt in self.stmt.stmts]
+        else:
+            prog = ["\t" * level + self.stmt.to_python()]
+
         for child in self.children:
             prog.append("\n")
             prog.append(child.to_python(level + 1))
@@ -116,6 +134,27 @@ class AST:
     def next_var_scope(self) -> VarScope:
         """Get a scope for the next variable that will be have if it is assigned to this AST"""
         return VarScope(self.id, len(self.children))
+
+    def has_statement_between_ast(self, stmtcls: type[Statement], end_ast_id: AST_ID):
+        """Check if there is a statement of the given type the current AST and the end_ast (exclusive)"""
+        for ast in self.children:
+            for intermediate_ast in ast.find_ast_to(end_ast_id):
+                if (
+                    isinstance(intermediate_ast.stmt, stmtcls)
+                    and intermediate_ast.id != end_ast_id
+                ):
+                    return True
+        return False
+
+    def find_ast_to(self, id: AST_ID):
+        """Iterate through ASTs that lead to the AST with the given id (inclusive)"""
+        if self.id == id:
+            yield self
+        else:
+            for ast in self.children:
+                if ast.find_ast(id) is not None:
+                    yield from ast.find_ast_to(id)
+                    break
 
     def find_ast(self, id: AST_ID) -> Optional[AST]:
         """Find the AST with the given id"""
