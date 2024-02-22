@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, Optional, Sequence
 
 from codegen.models.memory import Var
 
@@ -125,6 +125,13 @@ class ExprNegation(Expr):
 
 
 class PredefinedFn:
+    @dataclass
+    class tuple(Expr):
+        items: Sequence[Expr]
+
+        def to_python(self):
+            return f"({', '.join([item.to_python() for item in self.items])})"
+
     @dataclass
     class item_getter(Expr):
         collection: Expr
