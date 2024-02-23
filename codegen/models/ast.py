@@ -87,8 +87,12 @@ class AST:
         self._add_stmt(AssignStatement(var, expr))
         var.set_scope(mem, scope)
 
-    def for_loop(self, item: Var, iter: Expr):
-        return self._add_stmt(ForLoopStatement(item, iter))
+    def for_loop(self, mem: Memory, item: Var, iter: Expr):
+        assert item.scope is None, "The variable is already assigned to a scope"
+        ast = self._add_stmt(ForLoopStatement(item, iter))
+        scope = ast.next_var_scope()
+        item.set_scope(mem, scope)
+        return ast
 
     def if_(self, condition: Expr):
         return self._add_stmt(IfStatement(condition))
