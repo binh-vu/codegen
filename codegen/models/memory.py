@@ -40,7 +40,22 @@ class Memory:
         key: KEY,
         scope: SCOPE,
         type: REGISTER_TYPE,
+        strict: bool,
     ):
+        """
+        Args:
+            strict: if True, raise an error if there is a register with the same name, key, and type.
+        """
+        if strict:
+            matched_records = self.find(name=name, key=key, type=type)
+        else:
+            matched_records = self.find(name=name, key=key, scope=scope, type=type)
+
+        if len(matched_records) > 0:
+            raise ValueError(
+                f"There is already a register with the same name={name}, key={key}, scope={scope} (if strict=True), and type={type}"
+            )
+
         register_id = self.counter
         self.counter += 1
         self.registers.loc[register_id] = [register_id, name, key, scope, type]
@@ -148,8 +163,14 @@ class Var:  # variable
         name: str,
         key: KEY = NO_KEY,
         scope: Optional[VarScope] = None,
+        strict: bool = True,
     ):
-        return Var(name, key, mem.register(name, key, scope or NO_SCOPE, "var"), scope)
+        return Var(
+            name,
+            key,
+            mem.register(name, key, scope or NO_SCOPE, "var", strict),
+            scope,
+        )
 
     @staticmethod
     def deref(
