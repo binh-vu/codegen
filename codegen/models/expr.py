@@ -141,6 +141,15 @@ class PredefinedFn:
             return f"{self.collection.to_python()}[{self.item.to_python()}]"
 
     @dataclass
+    class item_setter(Expr):
+        collection: Expr
+        item: Expr
+        value: Expr
+
+        def to_python(self):
+            return f"{self.collection.to_python()}[{self.item.to_python()}] = {self.value.to_python()}"
+
+    @dataclass
     class len(Expr):
         collection: Expr
 
