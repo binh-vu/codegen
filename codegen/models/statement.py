@@ -42,9 +42,10 @@ class LineBreak(Statement):
 @dataclass
 class ImportStatement(Statement):
     module: str
+    is_import_attr: bool
 
     def to_python(self):
-        if self.module.find(".") != -1:
+        if self.module.find(".") != -1 and self.is_import_attr:
             module, attr = self.module.rsplit(".", 1)
             return f"from {module} import {attr}"
         return f"import {self.module}"
@@ -133,3 +134,11 @@ class Comment(Statement):
 
     def to_python(self):
         return f"# {self.comment}"
+
+
+@dataclass
+class PythonStatement(Statement):
+    stmt: str
+
+    def to_python(self):
+        return self.stmt

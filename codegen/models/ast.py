@@ -18,6 +18,7 @@ from codegen.models.statement import (
     ImportStatement,
     LineBreak,
     NoStatement,
+    PythonStatement,
     ReturnStatement,
     SingleExprStatement,
     Statement,
@@ -61,8 +62,8 @@ class AST:
         for child in self.children:
             child.freeze()
 
-    def import_(self, module: str):
-        self._add_stmt(ImportStatement(module))
+    def import_(self, module: str, is_import_attr: bool):
+        self._add_stmt(ImportStatement(module, is_import_attr))
 
     def return_(self, expr: Expr):
         self._add_stmt(ReturnStatement(expr))
@@ -100,6 +101,9 @@ class AST:
     def else_(self):
         assert len(self.children) > 0 and isinstance(self.children[-1].stmt, Statement)
         return self._add_stmt(ElseStatement())
+
+    def python_stmt(self, stmt: str) -> AST:
+        return self._add_stmt(PythonStatement(stmt))
 
     def update_recursively(
         self, fn: Callable[[AST, Any], tuple[AST, Any, bool]], context: Any

@@ -33,6 +33,10 @@ class ImportManager(BlockStatement):
 
     stmts: list[ImportStatement] = field(default_factory=list)
 
-    def import_(self, module: str):
-        if not any(stmt.module == module for stmt in self.stmts):
-            self.stmts.append(ImportStatement(module))
+    def import_(self, module: str, is_import_attr: bool):
+        # TODO: verify if the import override the previous import (e.g., having same attribute name)
+        if not any(
+            stmt.module == module and stmt.is_import_attr == is_import_attr
+            for stmt in self.stmts
+        ):
+            self.stmts.append(ImportStatement(module, is_import_attr))
