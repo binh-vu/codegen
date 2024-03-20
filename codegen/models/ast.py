@@ -43,6 +43,8 @@ class AST:
         self, *args: Callable[[AST], Any] | Statement, return_self: bool = False
     ) -> Optional[AST]:
         """Allow to build the graph hierarchically"""
+        assert isinstance(return_self, bool)
+
         return_val = None
 
         for fn in args:
