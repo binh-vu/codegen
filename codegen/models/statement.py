@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 from codegen.models.expr import ExceptionExpr, Expr
-from codegen.models.memory import Var
+from codegen.models.var import Var
 
 
 class Statement(ABC):
@@ -14,23 +14,15 @@ class Statement(ABC):
         raise NotImplementedError()
 
 
-class NoStatement(Statement):
-    def __repr__(self):
-        return "NoStatement()"
-
-    def to_python(self):
-        return "pass"
-
-
 @dataclass
 class BlockStatement(Statement):
-    """A placeholder for a block of statements. It is used to group multiple same-level statements together."""
-
-    stmts: list[Statement] = field(default_factory=list)
+    # whether the block has its own environment or not -- meaning any variables declared inside the block will be
+    # only visible inside the block
+    has_owned_env: bool = True
 
     def to_python(self):
         raise Exception(
-            "BlockStatement won't provide the implementation. Users should invoke the implementation of each inner statement directly."
+            "BlockStatement doesn't have any direct statement. You can use it to create scope for variables."
         )
 
 

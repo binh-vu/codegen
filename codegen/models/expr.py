@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Optional, Sequence
 
-from codegen.models.memory import Var
+from codegen.models.var import Var
 
 
 class Expr(ABC):

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "codegen-2"
-version = "1.4.0"
+version = "2.0.0"
 description = "Meta-programming"
 authors = ["Binh Vu <binh@toan2.com>"]
 license = "MIT"
@@ -9,7 +9,6 @@ packages = [{ include = "codegen" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pandas = "^2.2.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.1.1"
