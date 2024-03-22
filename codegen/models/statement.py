@@ -14,6 +14,14 @@ class Statement(ABC):
         raise NotImplementedError()
 
 
+class NoStatement(Statement):
+    def __repr__(self):
+        return "NoStatement()"
+
+    def to_python(self):
+        return "pass"
+
+
 @dataclass
 class BlockStatement(Statement):
     # whether the block has its own environment or not -- meaning any variables declared inside the block will be
