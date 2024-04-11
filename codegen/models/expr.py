@@ -121,7 +121,9 @@ class ExprNegation(Expr):
     expr: Expr
 
     def to_python(self):
-        return f"not {self.expr.to_python()}"
+        if isinstance(self.expr, (ExprVar, ExprConstant)):
+            return f"not {self.expr.to_python()}"
+        return f"not ({self.expr.to_python()})"
 
 
 class PredefinedFn:
@@ -173,7 +175,17 @@ class PredefinedFn:
         item: Expr
 
         def to_python(self):
-            return f"({self.item.to_python()}) in {self.set_.to_python()}"
+            if isinstance(self.set_, (ExprVar, ExprConstant)):
+                set_py = self.set_.to_python()
+            else:
+                set_py = f"({self.set_.to_python()})"
+
+            if isinstance(self.item, (ExprVar, ExprConstant)):
+                item_py = self.item.to_python()
+            else:
+                item_py = f"({self.item.to_python()})"
+
+            return f"{item_py} in {set_py}"
 
     @dataclass
     class list_append(Expr):

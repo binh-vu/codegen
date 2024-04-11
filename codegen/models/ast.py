@@ -128,7 +128,9 @@ class AST:
         return self._add_stmt(IfStatement(condition))
 
     def else_(self):
-        assert len(self.children) > 0 and isinstance(self.children[-1].stmt, Statement)
+        assert len(self.children) > 0 and isinstance(
+            self.children[-1].stmt, IfStatement
+        )
         return self._add_stmt(ElseStatement())
 
     def python_stmt(self, stmt: str) -> AST:

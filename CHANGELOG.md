@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1] - 2024-04-10
+
+### Fixed
+
+- Fix wrapping complex expression in `()`
+- Fix checking else\_ statement
+
 ## [2.1.0] - 2024-03-21
 
 ### Added
