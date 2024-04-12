@@ -13,6 +13,11 @@ class Expr(ABC):
     def to_python(self):
         raise NotImplementedError()
 
+    def to_wrapped_python(self):
+        if isinstance(self, (ExprVar, ExprConstant)):
+            return self.to_python()
+        return f"({self.to_python()})"
+
 
 class ExceptionExpr(Expr):
     pass
@@ -121,9 +126,7 @@ class ExprNegation(Expr):
     expr: Expr
 
     def to_python(self):
-        if isinstance(self.expr, (ExprVar, ExprConstant)):
-            return f"not {self.expr.to_python()}"
-        return f"not ({self.expr.to_python()})"
+        return f"not {self.expr.to_wrapped_python()}"
 
 
 class PredefinedFn:
@@ -175,17 +178,7 @@ class PredefinedFn:
         item: Expr
 
         def to_python(self):
-            if isinstance(self.set_, (ExprVar, ExprConstant)):
-                set_py = self.set_.to_python()
-            else:
-                set_py = f"({self.set_.to_python()})"
-
-            if isinstance(self.item, (ExprVar, ExprConstant)):
-                item_py = self.item.to_python()
-            else:
-                item_py = f"({self.item.to_python()})"
-
-            return f"{item_py} in {set_py}"
+            return f"{self.item.to_wrapped_python()} in {self.set_.to_wrapped_python()}"
 
     @dataclass
     class list_append(Expr):
@@ -193,7 +186,7 @@ class PredefinedFn:
         item: Expr
 
         def to_python(self):
-            return f"{self.lst.to_python()}.append({self.item.to_python()})"
+            return f"{self.lst.to_wrapped_python()}.append({self.item.to_python()})"
 
     @dataclass
     class has_item(Expr):
@@ -201,7 +194,7 @@ class PredefinedFn:
         item: Expr
 
         def to_python(self):
-            return f"({self.item.to_python()}) in {self.collection.to_python()}"
+            return f"{self.item.to_wrapped_python()} in {self.collection.to_wrapped_python()}"
 
     @dataclass
     class base_error(ExceptionExpr):

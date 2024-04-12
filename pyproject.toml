@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "codegen-2"
-version = "2.1.2"
+version = "2.1.3"
 description = "Meta-programming"
 authors = ["Binh Vu <binh@toan2.com>"]
 license = "MIT"
