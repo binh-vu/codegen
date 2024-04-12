@@ -15,6 +15,7 @@ from codegen.models.statement import (
     IfStatement,
     ImportStatement,
     LineBreak,
+    NoStatement,
     PythonStatement,
     ReturnStatement,
     SingleExprStatement,
@@ -176,6 +177,7 @@ class AST:
         else:
             for ast in self.children:
                 if ast.find_ast(id) is not None:
+                    yield self
                     yield from ast.find_ast_to(id)
                     break
 
@@ -211,6 +213,8 @@ class AST:
         return VarScope(self.id, len(self.children))
 
     def _add_stmt(self, stmt: Statement):
+        if isinstance(stmt, NoStatement):
+            return self
         if self._is_frozen:
             raise Exception("The AST is frozen and cannot be modified")
         ast = AST(self.next_child_id(), self.prog, stmt)

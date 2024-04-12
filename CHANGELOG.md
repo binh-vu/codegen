@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.2] - 2024-04-12
+
+### Fixed
+
+- Fix `AST.find_ast_to`
+
 ## [2.1.1] - 2024-04-10
 
 ### Fixed
