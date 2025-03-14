@@ -61,6 +61,14 @@ class DefFuncStatement(Statement):
 
 
 @dataclass
+class DefClassStatement(Statement):
+    name: str
+
+    def to_python(self):
+        return f"class {self.name}:"
+
+
+@dataclass
 class AssignStatement(Statement):
     var: Var
     expr: Expr
