@@ -15,14 +15,18 @@ class Program:
     root: AST
     vars: VarRegisters
     import_area: AST
+    imported_modules: set[str]
 
     def __init__(self):
         self.vars = VarRegisters(self)
         self.root = AST.root(self)
         self.import_area = self.root._add_stmt(BlockStatement(has_owned_env=False))
+        self.imported_modules = set()
 
     def import_(self, module: str, is_import_attr: bool):
-        self.import_area.import_(module, is_import_attr)
+        if module not in self.imported_modules:
+            self.import_area.import_(module, is_import_attr)
+            self.imported_modules.add(module)
 
     def get_ast_by_id(self, id: AST_ID) -> AST:
         ast = self.root
