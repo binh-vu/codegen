@@ -9,6 +9,7 @@ from codegen.models.statement import (
     BlockStatement,
     Comment,
     DefClassStatement,
+    DefClassVarStatement,
     DefFuncStatement,
     ElseStatement,
     ExceptionStatement,
@@ -92,9 +93,9 @@ class AST:
             )
         return self._add_stmt(DefFuncStatement(name, [var.get_var() for var in vars]))
 
-    def class_(self, name: str):
+    def class_(self, name: str, parents: Optional[list[str]] = None):
         """Define a class."""
-        return self._add_stmt(DefClassStatement(name))
+        return self._add_stmt(DefClassStatement(name, parents or []))
 
     def expr(self, expr: Expr):
         return self._add_stmt(SingleExprStatement(expr))

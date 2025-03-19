@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from typing import Optional
 
 from codegen.models.expr import ExceptionExpr, Expr
 from codegen.models.var import Var
@@ -63,9 +64,29 @@ class DefFuncStatement(Statement):
 @dataclass
 class DefClassStatement(Statement):
     name: str
+    parents: list[str] = field(default_factory=list)
 
     def to_python(self):
-        return f"class {self.name}:"
+        if len(self.parents) == 0:
+            return f"class {self.name}:"
+        return f"class {self.name}({', '.join(self.parents)}):"
+
+
+@dataclass
+class DefClassVarStatement(Statement):
+    """Statement to define a variable with type"""
+
+    # name of the variable
+    name: str
+    # type of the variable
+    type: str
+    # value of the variable
+    value: Optional[str]
+
+    def to_python(self):
+        if self.value is None:
+            return f"{self.name}: {self.type}"
+        return f"{self.name}: {self.type} = {self.value}"
 
 
 @dataclass
