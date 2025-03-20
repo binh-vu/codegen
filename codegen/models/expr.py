@@ -76,7 +76,7 @@ class ExprVar(Expr):  # a special identifier
 @dataclass
 class ExprFuncCall(Expr):
     func_name: Expr
-    args: list[Expr]
+    args: Sequence[Expr]
 
     def to_python(self):
         return f"{self.func_name.to_python()}({', '.join([arg.to_python() for arg in self.args])})"
@@ -86,7 +86,7 @@ class ExprFuncCall(Expr):
 class ExprMethodCall(Expr):
     object: Expr
     method: str
-    args: list[Expr]
+    args: Sequence[Expr]
 
     def to_python(self):
         if self.method == "__contains__" and len(self.args) == 1:
@@ -209,3 +209,11 @@ class PredefinedFn:
 
         def to_python(self):
             return f"KeyError('{self.msg}')"
+
+    @dataclass
+    class keyword_assignment(Expr):
+        keyword: str
+        value: Expr
+
+        def to_python(self):
+            return f"{self.keyword}={self.value.to_python()}"

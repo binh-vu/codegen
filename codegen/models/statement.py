@@ -81,7 +81,7 @@ class DefClassVarStatement(Statement):
     # type of the variable
     type: str
     # value of the variable
-    value: Optional[str]
+    value: Optional[Expr] = None
 
     def to_python(self):
         if self.value is None:
