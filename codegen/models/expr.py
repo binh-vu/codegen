@@ -138,6 +138,22 @@ class PredefinedFn:
             return f"({', '.join([item.to_python() for item in self.items])})"
 
     @dataclass
+    class dict(Expr):
+        items: Sequence[tuple[Expr, Expr]]
+
+        def to_python(self):
+            return (
+                "{"
+                + ", ".join(
+                    [
+                        f"{key.to_python()}: {value.to_python()}"
+                        for key, value in self.items
+                    ]
+                )
+                + "}"
+            )
+
+    @dataclass
     class item_getter(Expr):
         collection: Expr
         item: Expr

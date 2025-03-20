@@ -24,6 +24,8 @@ class VarScope(NamedTuple):
 
 @dataclass
 class Var:  # variable
+    """To create the variable for the first time, use DeferredVar."""
+
     name: str
     key: KEY
     register_id: int
@@ -38,7 +40,7 @@ class Var:  # variable
 
 @dataclass
 class DeferredVar:
-    """Containings the information to create a variable"""
+    """Containings the information to create a variable. This is the class to use to create variable."""
 
     name: str
     key: KEY = NO_KEY

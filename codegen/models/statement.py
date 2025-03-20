@@ -86,7 +86,7 @@ class DefClassVarStatement(Statement):
     def to_python(self):
         if self.value is None:
             return f"{self.name}: {self.type}"
-        return f"{self.name}: {self.type} = {self.value}"
+        return f"{self.name}: {self.type} = {self.value.to_python()}"
 
 
 @dataclass
