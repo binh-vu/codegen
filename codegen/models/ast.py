@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
 
 from codegen.models.expr import ExceptionExpr, Expr
 from codegen.models.statement import (
@@ -84,14 +84,30 @@ class AST:
     def comment(self, comment: str):
         self._add_stmt(Comment(comment))
 
-    def func(self, name: str, vars: list[DeferredVar]):
+    def func(self, name: str, vars: Sequence[DeferredVar | tuple[DeferredVar, Expr]]):
         """Define a function. The input variables are deferred vars as they are created for this function (i.e., must not be predefined prior to this function)"""
         grandchild_id = self.next_grandchild_id()
-        for var in vars:
+        for vararg in vars:
+            if isinstance(vararg, tuple):
+                var = vararg[0]
+            else:
+                var = vararg
             var.set_var(
                 self.prog.create_var(var.name, var.key, grandchild_id, var.force_name)
             )
-        return self._add_stmt(DefFuncStatement(name, [var.get_var() for var in vars]))
+        return self._add_stmt(
+            DefFuncStatement(
+                name,
+                [
+                    (
+                        (var[0].get_var(), var[1])
+                        if isinstance(var, tuple)
+                        else var.get_var()
+                    )
+                    for var in vars
+                ],
+            )
+        )
 
     def class_(self, name: str, parents: Optional[list[str]] = None):
         """Define a class."""

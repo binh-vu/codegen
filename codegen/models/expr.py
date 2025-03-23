@@ -31,7 +31,7 @@ class ExprConstant(Expr):
         return ExprConstant.constant_to_python(self.constant)
 
     @staticmethod
-    def constant_to_python(val: Any):
+    def constant_to_python(val: Any) -> str:
         if isinstance(val, bool) or val is None:
             return str(val)
         if isinstance(val, (str, int, float)):
@@ -55,6 +55,7 @@ class ExprConstant(Expr):
             return (
                 "{" + ", ".join([ExprConstant.constant_to_python(v) for v in val]) + "}"
             )
+        raise NotImplementedError()
 
 
 @dataclass

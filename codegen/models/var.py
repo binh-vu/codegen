@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import NamedTuple, Optional
+from typing import TYPE_CHECKING, NamedTuple, Optional
 
 from codegen.models.types import AST_ID, KEY, NO_KEY
+
+if TYPE_CHECKING:
+    from codegen.models.expr import ExprIdent
 
 
 class VarScope(NamedTuple):
@@ -31,11 +34,19 @@ class Var:  # variable
     register_id: int
     scope: VarScope
     force_name: Optional[str] = None
+    # type of the variable
+    type: Optional[ExprIdent] = None
 
     def get_name(self) -> str:
         if self.force_name is None:
             return f"{self.name}_{self.register_id}"
         return self.force_name
+
+    def to_python(self):
+        """Get the python code to create the variable"""
+        if self.type is None:
+            return f"{self.get_name()}"
+        return f"{self.get_name()}: {self.type.to_python()}"
 
 
 @dataclass
@@ -45,6 +56,7 @@ class DeferredVar:
     name: str
     key: KEY = NO_KEY
     force_name: Optional[str] = None
+    type: Optional[ExprIdent] = None
 
     # the variable that we want to create --- this will be not None when the variable is actually created
     _var: Optional[Var] = None

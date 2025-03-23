@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from codegen.models.ast import AST
+from codegen.models.expr import ExprIdent  # You may need to adjust this import path
 from codegen.models.statement import BlockStatement
 from codegen.models.types import AST_ID, KEY
 from codegen.models.var import Var, VarScope
@@ -52,15 +53,21 @@ class Program:
         )
 
     def create_var(
-        self, name: str, key: KEY, ast: AST_ID, force_name: Optional[str] = None
+        self,
+        name: str,
+        key: KEY,
+        ast: AST_ID,
+        force_name: Optional[str] = None,
+        type: Optional[ExprIdent] = None,
     ) -> Var:
-        reg = self.vars.register(name, key, ast, force_name)
+        reg = self.vars.register(name, key, ast, force_name, type)
         return Var(
             name=name,
             key=key,
             register_id=reg.id,
             scope=reg.scope,
             force_name=force_name,
+            type=type,
         )
 
     def get_var(
@@ -73,7 +80,9 @@ class Program:
         reg = self.vars.find(key, at)
         if reg is None:
             raise KeyError(f"Variable with key {key} is not found in the current scope")
-        return Var(reg.name, key, reg.id, reg.scope)
+        return Var(
+            name=reg.name, key=key, register_id=reg.id, scope=reg.scope, type=reg.type
+        )
 
 
 @dataclass
@@ -83,6 +92,7 @@ class VarRegister:
     key: KEY
     scope: VarScope
     force_name: Optional[str] = None
+    type: Optional[ExprIdent] = None
 
 
 @dataclass
@@ -92,7 +102,12 @@ class VarRegisters:
     key2registers: dict[KEY, list[int]] = field(default_factory=dict)
 
     def register(
-        self, name: str, key: KEY, ast: AST_ID, force_name: Optional[str] = None
+        self,
+        name: str,
+        key: KEY,
+        ast: AST_ID,
+        force_name: Optional[str] = None,
+        type: Optional[ExprIdent] = None,
     ) -> VarRegister:
         """Register a new variable with the given name, key, then return the register id.
 
@@ -114,6 +129,7 @@ class VarRegisters:
             key=key,
             scope=VarScope.from_ast_id(ast),
             force_name=force_name,
+            type=type,
         )
         self.registers.append(reg)
         self.key2registers.setdefault(key, []).append(reg.id)

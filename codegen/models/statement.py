@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Sequence
 
 from codegen.models.expr import ExceptionExpr, Expr
 from codegen.models.var import Var
@@ -55,10 +55,10 @@ class ImportStatement(Statement):
 @dataclass
 class DefFuncStatement(Statement):
     name: str
-    args: list[Var] = field(default_factory=list)
+    args: Sequence[Var | tuple[Var, Expr]] = field(default_factory=list)
 
     def to_python(self):
-        return f"def {self.name}({', '.join([arg.get_name() for arg in self.args])}):"
+        return f"def {self.name}({', '.join([arg[0].to_python() + " = " + arg[1].to_python() if isinstance(arg, tuple) else arg.to_python() for arg in self.args])}):"
 
 
 @dataclass
