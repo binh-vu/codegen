@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Optional, Sequence
 
-from codegen.models.expr import ExceptionExpr, Expr
+from codegen.models.expr import ExceptionExpr, Expr, ExprFuncCall
 from codegen.models.var import Var
 
 
@@ -56,20 +56,27 @@ class ImportStatement(Statement):
 class DefFuncStatement(Statement):
     name: str
     args: Sequence[Var | tuple[Var, Expr]] = field(default_factory=list)
+    return_type: Optional[Expr] = None
+    is_async: bool = False
 
     def to_python(self):
-        return f"def {self.name}({', '.join([arg[0].to_python() + " = " + arg[1].to_python() if isinstance(arg, tuple) else arg.to_python() for arg in self.args])}):"
+        sig = f"def {self.name}({', '.join([arg[0].to_python() + " = " + arg[1].to_python() if isinstance(arg, tuple) else arg.to_python() for arg in self.args])})"
+        if self.return_type is not None:
+            sig += f" -> {self.return_type.to_python()}"
+        if self.is_async:
+            sig = "async " + sig
+        return sig + ":"
 
 
 @dataclass
 class DefClassStatement(Statement):
     name: str
-    parents: list[str] = field(default_factory=list)
+    parents: list[Expr] = field(default_factory=list)
 
     def to_python(self):
         if len(self.parents) == 0:
             return f"class {self.name}:"
-        return f"class {self.name}({', '.join(self.parents)}):"
+        return f"class {self.name}({', '.join(p.to_python() for p in self.parents)}):"
 
 
 @dataclass
@@ -171,3 +178,11 @@ class PythonStatement(Statement):
 
     def to_python(self):
         return self.stmt
+
+
+@dataclass
+class PythonDecoratorStatement(Statement):
+    decorator: ExprFuncCall
+
+    def to_python(self):
+        return f"@{self.decorator.to_python()}"

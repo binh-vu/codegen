@@ -84,7 +84,13 @@ class AST:
     def comment(self, comment: str):
         self._add_stmt(Comment(comment))
 
-    def func(self, name: str, vars: Sequence[DeferredVar | tuple[DeferredVar, Expr]]):
+    def func(
+        self,
+        name: str,
+        vars: Sequence[DeferredVar | tuple[DeferredVar, Expr]],
+        return_type: Optional[Expr] = None,
+        is_async: bool = False,
+    ):
         """Define a function. The input variables are deferred vars as they are created for this function (i.e., must not be predefined prior to this function)"""
         grandchild_id = self.next_grandchild_id()
         for vararg in vars:
@@ -93,7 +99,9 @@ class AST:
             else:
                 var = vararg
             var.set_var(
-                self.prog.create_var(var.name, var.key, grandchild_id, var.force_name)
+                self.prog.create_var(
+                    var.name, var.key, grandchild_id, var.force_name, var.type
+                )
             )
         return self._add_stmt(
             DefFuncStatement(
@@ -106,10 +114,12 @@ class AST:
                     )
                     for var in vars
                 ],
+                return_type,
+                is_async,
             )
         )
 
-    def class_(self, name: str, parents: Optional[list[str]] = None):
+    def class_(self, name: str, parents: Optional[list[Expr]] = None):
         """Define a class."""
         return self._add_stmt(DefClassStatement(name, parents or []))
 

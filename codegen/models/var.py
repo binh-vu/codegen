@@ -61,6 +61,11 @@ class DeferredVar:
     # the variable that we want to create --- this will be not None when the variable is actually created
     _var: Optional[Var] = None
 
+    @staticmethod
+    def simple(name: str, type: Optional[ExprIdent] = None) -> DeferredVar:
+        """Create a DeferredVar with the given name and type"""
+        return DeferredVar(name, (name,), name, type)
+
     def get_var(self) -> Var:
         if self._var is None:
             raise ValueError("The variable has not been created yet")

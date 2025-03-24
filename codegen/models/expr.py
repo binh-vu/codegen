@@ -67,6 +67,14 @@ class ExprIdent(Expr):
 
 
 @dataclass
+class ExprRawPython(Expr):
+    code: str
+
+    def to_python(self):
+        return self.code
+
+
+@dataclass
 class ExprVar(Expr):  # a special identifier
     var: Var
 
@@ -130,6 +138,15 @@ class ExprNegation(Expr):
         return f"not {self.expr.to_wrapped_python()}"
 
 
+@dataclass
+class ExprDivision(Expr):
+    left: Expr
+    right: Expr
+
+    def to_python(self):
+        return f"{self.left.to_python()} / {self.right.to_python()}"
+
+
 class PredefinedFn:
     @dataclass
     class tuple(Expr):
@@ -137,6 +154,13 @@ class PredefinedFn:
 
         def to_python(self):
             return f"({', '.join([item.to_python() for item in self.items])})"
+
+    @dataclass
+    class list(Expr):
+        items: Sequence[Expr]
+
+        def to_python(self):
+            return f"[{', '.join([item.to_python() for item in self.items])}]"
 
     @dataclass
     class dict(Expr):
@@ -212,6 +236,14 @@ class PredefinedFn:
 
         def to_python(self):
             return f"{self.item.to_wrapped_python()} in {self.collection.to_wrapped_python()}"
+
+    @dataclass
+    class not_has_item(Expr):
+        collection: Expr
+        item: Expr
+
+        def to_python(self):
+            return f"{self.item.to_wrapped_python()} not in {self.collection.to_wrapped_python()}"
 
     @dataclass
     class base_error(ExceptionExpr):
