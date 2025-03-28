@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Optional, Sequence
+from typing import Any, Callable, Optional, Sequence
 
 from codegen.models.var import Var
 
@@ -211,6 +211,15 @@ class PredefinedFn:
             return f"{self.collection.to_python()}.{self.attr.to_python()}"
 
     @dataclass
+    class attr_setter(Expr):
+        collection: Expr
+        attr: Expr
+        value: Expr
+
+        def to_python(self):
+            return f"{self.collection.to_python()}.{self.attr.to_python()} = {self.value.to_python()}"
+
+    @dataclass
     class item_getter(Expr):
         collection: Expr
         item: Expr
@@ -234,13 +243,17 @@ class PredefinedFn:
         def to_python(self):
             return f"len({self.collection.to_python()})"
 
-    @dataclass
+    @dataclass(init=False)
     class map_list(Expr):
         collection: Expr
-        func_name: Expr
+        func: Expr
+
+        def __init__(self, collection: Expr, func: Callable[[ExprIdent], Expr]):
+            self.collection = collection
+            self.func = func(ExprIdent("_x"))
 
         def to_python(self):
-            return f"[{self.func_name.to_python()}(_x) for _x in {self.collection.to_python()}]"
+            return f"[{self.func.to_python()} for _x in {self.collection.to_python()}]"
 
     @dataclass
     class range(Expr):
