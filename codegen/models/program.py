@@ -24,9 +24,9 @@ class Program:
         self.import_area = self.root._add_stmt(BlockStatement(has_owned_env=False))
         self.imported_modules = set()
 
-    def import_(self, module: str, is_import_attr: bool):
+    def import_(self, module: str, is_import_attr: bool, alias: Optional[str] = None):
         if module not in self.imported_modules:
-            self.import_area.import_(module, is_import_attr)
+            self.import_area.import_(module, is_import_attr, alias)
             self.imported_modules.add(module)
 
     def get_ast_by_id(self, id: AST_ID) -> AST:

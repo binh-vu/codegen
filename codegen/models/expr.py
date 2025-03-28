@@ -19,8 +19,16 @@ class Expr(ABC):
         return f"({self.to_python()})"
 
 
-class ExceptionExpr(Expr):
-    pass
+class ExceptionExpr(Expr): ...
+
+
+@dataclass
+class StandardExceptionExpr(ExceptionExpr):
+    cls: Expr
+    args: Sequence[Expr]
+
+    def to_python(self):
+        return f"{self.cls.to_python()}({', '.join([arg.to_python() for arg in self.args])})"
 
 
 @dataclass
@@ -131,6 +139,15 @@ class ExprEqual(Expr):
 
 
 @dataclass
+class ExprIs(Expr):
+    left: Expr
+    right: Expr
+
+    def to_python(self):
+        return f"{self.left.to_python()} is {self.right.to_python()}"
+
+
+@dataclass
 class ExprNegation(Expr):
     expr: Expr
 
@@ -148,6 +165,13 @@ class ExprDivision(Expr):
 
 
 class PredefinedFn:
+    @dataclass
+    class is_null(Expr):
+        expr: Expr
+
+        def to_python(self):
+            return f"{self.expr.to_python()} is None"
+
     @dataclass
     class tuple(Expr):
         items: Sequence[Expr]
@@ -179,6 +203,14 @@ class PredefinedFn:
             )
 
     @dataclass
+    class attr_getter(Expr):
+        collection: Expr
+        attr: Expr
+
+        def to_python(self):
+            return f"{self.collection.to_python()}.{self.attr.to_python()}"
+
+    @dataclass
     class item_getter(Expr):
         collection: Expr
         item: Expr
@@ -201,6 +233,14 @@ class PredefinedFn:
 
         def to_python(self):
             return f"len({self.collection.to_python()})"
+
+    @dataclass
+    class map_list(Expr):
+        collection: Expr
+        func_name: Expr
+
+        def to_python(self):
+            return f"[{self.func_name.to_python()}(_x) for _x in {self.collection.to_python()}]"
 
     @dataclass
     class range(Expr):

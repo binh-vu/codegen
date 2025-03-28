@@ -44,12 +44,18 @@ class LineBreak(Statement):
 class ImportStatement(Statement):
     module: str
     is_import_attr: bool
+    alias: Optional[str] = None
 
     def to_python(self):
         if self.module.find(".") != -1 and self.is_import_attr:
             module, attr = self.module.rsplit(".", 1)
-            return f"from {module} import {attr}"
-        return f"import {self.module}"
+            stmt = f"from {module} import {attr}"
+        else:
+            stmt = f"import {self.module}"
+
+        if self.alias is not None:
+            stmt += f" as {self.alias}"
+        return stmt
 
 
 @dataclass
@@ -86,11 +92,15 @@ class DefClassVarStatement(Statement):
     # name of the variable
     name: str
     # type of the variable
-    type: str
+    type: Optional[str]
     # value of the variable
     value: Optional[Expr] = None
 
     def to_python(self):
+        if self.type is None:
+            if self.value is None:
+                return f"{self.name}"
+            return f"{self.name} = {self.value.to_python()}"
         if self.value is None:
             return f"{self.name}: {self.type}"
         return f"{self.name}: {self.type} = {self.value.to_python()}"
@@ -185,4 +195,6 @@ class PythonDecoratorStatement(Statement):
     decorator: ExprFuncCall
 
     def to_python(self):
+        if len(self.decorator.args) == 0:
+            return f"@{self.decorator.func_name.to_python()}"
         return f"@{self.decorator.to_python()}"

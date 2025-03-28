@@ -69,8 +69,8 @@ class AST:
         for child in self.children:
             child.freeze()
 
-    def import_(self, module: str, is_import_attr: bool):
-        self._add_stmt(ImportStatement(module, is_import_attr))
+    def import_(self, module: str, is_import_attr: bool, alias: Optional[str] = None):
+        self._add_stmt(ImportStatement(module, is_import_attr, alias))
 
     def return_(self, expr: Expr):
         self._add_stmt(ReturnStatement(expr))
