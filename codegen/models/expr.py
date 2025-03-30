@@ -11,7 +11,10 @@ from codegen.models.var import Var
 class Expr(ABC):
     @abstractmethod
     def to_python(self):
-        raise NotImplementedError()
+        raise NotImplementedError(self.__class__)
+
+    def to_typescript(self):
+        raise NotImplementedError(self.__class__)
 
     def to_wrapped_python(self):
         if isinstance(self, (ExprVar, ExprConstant)):
@@ -38,6 +41,9 @@ class ExprConstant(Expr):
     def to_python(self):
         return ExprConstant.constant_to_python(self.constant)
 
+    def to_typescript(self):
+        return ExprConstant.constant_to_typescript(self.constant)
+
     @staticmethod
     def constant_to_python(val: Any) -> str:
         if isinstance(val, bool) or val is None:
@@ -61,7 +67,42 @@ class ExprConstant(Expr):
             )
         if isinstance(val, set):
             return (
-                "{" + ", ".join([ExprConstant.constant_to_python(v) for v in val]) + "}"
+                "{"
+                + ", ".join(sorted((ExprConstant.constant_to_python(v) for v in val)))
+                + "}"
+            )
+        raise NotImplementedError()
+
+    @staticmethod
+    def constant_to_typescript(val: Any) -> str:
+        if isinstance(val, bool):
+            return str(val).lower()
+        if val is None:
+            return "null"
+        if isinstance(val, (str, int, float)):
+            return json.dumps(val)
+        if isinstance(val, list):
+            return (
+                "["
+                + ", ".join([ExprConstant.constant_to_typescript(v) for v in val])
+                + "]"
+            )
+        if isinstance(val, dict):
+            return (
+                "{"
+                + ", ".join(
+                    [
+                        f"{ExprConstant.constant_to_typescript(k)}: {ExprConstant.constant_to_typescript(v)}"
+                        for k, v in val.items()
+                    ]
+                )
+                + "}"
+            )
+        if isinstance(val, set):
+            return (
+                "new Set(["
+                + ", ".join([ExprConstant.constant_to_typescript(v) for v in val])
+                + "])"
             )
         raise NotImplementedError()
 
@@ -71,6 +112,9 @@ class ExprIdent(Expr):
     ident: str
 
     def to_python(self):
+        return self.ident
+
+    def to_typescript(self):
         return self.ident
 
 
@@ -97,6 +141,21 @@ class ExprFuncCall(Expr):
 
     def to_python(self):
         return f"{self.func_name.to_python()}({', '.join([arg.to_python() for arg in self.args])})"
+
+    def to_typescript(self):
+        return f"{self.func_name.to_typescript()}({', '.join([arg.to_typescript() for arg in self.args])})"
+
+
+@dataclass
+class ExprNewInstance(Expr):
+    class_name: Expr
+    args: Sequence[Expr]
+
+    def to_python(self):
+        return f"{self.class_name.to_python()}({', '.join([arg.to_python() for arg in self.args])})"
+
+    def to_typescript(self):
+        return f"new {self.class_name.to_typescript()}({', '.join([arg.to_typescript() for arg in self.args])})"
 
 
 @dataclass
@@ -136,6 +195,9 @@ class ExprEqual(Expr):
 
     def to_python(self):
         return f"{self.left.to_python()} == {self.right.to_python()}"
+
+    def to_typescript(self):
+        return f"{self.left.to_typescript()} === {self.right.to_typescript()}"
 
 
 @dataclass
@@ -202,6 +264,18 @@ class PredefinedFn:
                 + "}"
             )
 
+        def to_typescript(self):
+            return (
+                "{"
+                + ", ".join(
+                    [
+                        f"{key.to_typescript()}: {value.to_typescript()}"
+                        for key, value in self.items
+                    ]
+                )
+                + "}"
+            )
+
     @dataclass
     class attr_getter(Expr):
         collection: Expr
@@ -209,6 +283,9 @@ class PredefinedFn:
 
         def to_python(self):
             return f"{self.collection.to_python()}.{self.attr.to_python()}"
+
+        def to_typescript(self):
+            return f"{self.collection.to_typescript()}.{self.attr.to_typescript()}"
 
     @dataclass
     class attr_setter(Expr):
@@ -218,6 +295,9 @@ class PredefinedFn:
 
         def to_python(self):
             return f"{self.collection.to_python()}.{self.attr.to_python()} = {self.value.to_python()}"
+
+        def to_typescript(self):
+            return f"{self.collection.to_typescript()}.{self.attr.to_typescript()} = {self.value.to_typescript()};"
 
     @dataclass
     class item_getter(Expr):

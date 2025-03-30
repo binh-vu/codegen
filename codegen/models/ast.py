@@ -11,6 +11,7 @@ from codegen.models.statement import (
     DefClassStatement,
     DefClassVarStatement,
     DefFuncStatement,
+    DefInterfaceStatement,
     ElseStatement,
     ExceptionStatement,
     ForLoopStatement,
@@ -42,7 +43,11 @@ class AST:
 
     @staticmethod
     def root(prog: Program):
-        return AST(tuple(), prog, BlockStatement())
+        return AST(tuple(), prog, BlockStatement(has_owned_env=False))
+
+    def is_root(self) -> bool:
+        """Check if this is the root AST"""
+        return len(self.id) == 0
 
     def __call__(
         self, *args: Callable[[AST], Any] | Statement, return_self: bool = False
@@ -90,6 +95,8 @@ class AST:
         vars: Sequence[DeferredVar | tuple[DeferredVar, Expr]],
         return_type: Optional[Expr] = None,
         is_async: bool = False,
+        is_static: bool = False,
+        comment: str = "",
     ):
         """Define a function. The input variables are deferred vars as they are created for this function (i.e., must not be predefined prior to this function)"""
         grandchild_id = self.next_grandchild_id()
@@ -116,12 +123,18 @@ class AST:
                 ],
                 return_type,
                 is_async,
+                is_static,
+                comment,
             )
         )
 
     def class_(self, name: str, parents: Optional[list[Expr]] = None):
         """Define a class."""
         return self._add_stmt(DefClassStatement(name, parents or []))
+
+    def interface(self, name: str, parents: Optional[list[Expr]] = None):
+        """Define a class."""
+        return self._add_stmt(DefInterfaceStatement(name, parents or []))
 
     def expr(self, expr: Expr):
         return self._add_stmt(SingleExprStatement(expr))
@@ -180,16 +193,6 @@ class AST:
         while not stop:
             ast, context, stop = fn(ast, context)
         return ast
-
-    def to_python(self, level: int = 0):
-        """Convert the AST to python code"""
-        if isinstance(self.stmt, BlockStatement):
-            # there is no direct statement and the level does not increase after this statement
-            return "\n".join([child.to_python(level) for child in self.children])
-
-        prog = ["\t" * level + self.stmt.to_python()]
-        prog.extend((child.to_python(level + 1) for child in self.children))
-        return "\n".join(prog)
 
     def has_statement_between_ast(self, stmtcls: type[Statement], end_ast_id: AST_ID):
         """Check if there is a statement of the given type the current AST and the end_ast (exclusive)"""
@@ -250,3 +253,42 @@ class AST:
         ast = AST(self.next_child_id(), self.prog, stmt)
         self.children.append(ast)
         return ast
+
+    def to_python(self, level: int = 0):
+        """Convert the AST to python code"""
+        if isinstance(self.stmt, BlockStatement):
+            # there is no direct statement and the level does not increase after this statement
+            return "\n".join([child.to_python(level) for child in self.children])
+
+        prog = ["\t" * level + line for line in self.stmt.to_python().split("\n")]
+        prog.extend((child.to_python(level + 1) for child in self.children))
+        return "\n".join(prog)
+
+    def to_typescript(self, level: int = 0):
+        """Convert the AST to typescript code"""
+        if isinstance(self.stmt, BlockStatement):
+            if not self.stmt.has_owned_env:
+                # the level does not increase after this statement because we do not need to create a new scope
+                content = "\n".join(
+                    [child.to_typescript(level) for child in self.children]
+                )
+                if self.is_root():
+                    return content.lstrip("\n")
+                return content
+
+            if len(self.children) == 0:
+                return ""
+
+            return (
+                ("\t" * level + "{")
+                + "\n".join([child.to_typescript(level + 1) for child in self.children])
+                + "\n"
+                + ("\t" * level + "}")
+            )
+
+        prog = ["\t" * level + line for line in self.stmt.to_typescript().split("\n")]
+        if len(self.children) > 0:
+            prog.append("\t" * level + "{")
+            prog.extend((child.to_typescript(level + 1) for child in self.children))
+            prog.append("\t" * level + "}")
+        return "\n".join(prog)

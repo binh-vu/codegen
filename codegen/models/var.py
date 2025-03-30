@@ -48,6 +48,12 @@ class Var:  # variable
             return f"{self.get_name()}"
         return f"{self.get_name()}: {self.type.to_python()}"
 
+    def to_typescript(self):
+        """Get the typescript code to create the variable"""
+        if self.type is None:
+            return f"{self.get_name()}"
+        return f"{self.get_name()}: {self.type.to_typescript()}"
+
 
 @dataclass
 class DeferredVar:
