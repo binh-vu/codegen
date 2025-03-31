@@ -304,6 +304,17 @@ class PythonStatement(Statement):
 
 
 @dataclass
+class TypescriptStatement(Statement):
+    stmt: str
+
+    def to_python(self):
+        raise NotImplementedError()
+
+    def to_typescript(self):
+        return self.stmt
+
+
+@dataclass
 class PythonDecoratorStatement(Statement):
     decorator: ExprFuncCall
 
