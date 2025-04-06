@@ -77,6 +77,8 @@ class ExprConstant(Expr):
     def constant_to_typescript(val: Any) -> str:
         if isinstance(val, bool):
             return str(val).lower()
+        if val == "undefined":
+            return "undefined"
         if val is None:
             return "null"
         if isinstance(val, (str, int, float)):
