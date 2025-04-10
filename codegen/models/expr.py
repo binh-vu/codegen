@@ -171,6 +171,9 @@ class ExprMethodCall(Expr):
             return f"{self.args[0].to_python()} in {self.object.to_python()}"
         return f"{self.object.to_python()}.{self.method}({', '.join([arg.to_python() for arg in self.args])})"
 
+    def to_typescript(self):
+        return f"{self.object.to_typescript()}.{self.method}({', '.join([arg.to_typescript() for arg in self.args])})"
+
 
 @dataclass
 class ExprNotEqual(Expr):
@@ -336,6 +339,9 @@ class PredefinedFn:
 
         def to_python(self):
             return f"[{self.func.to_python()} for _x in {self.collection.to_python()}]"
+
+        def to_typescript(self):
+            return f"{self.collection.to_typescript()}.map((_x: any) => {self.func.to_typescript()})"
 
     @dataclass
     class range(Expr):

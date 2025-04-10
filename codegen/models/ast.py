@@ -50,7 +50,9 @@ class AST:
         return len(self.id) == 0
 
     def __call__(
-        self, *args: Callable[[AST], Any] | Statement, return_self: bool = False
+        self,
+        *args: Callable[[AST], Any] | Optional[Statement],
+        return_self: bool = False,
     ) -> Optional[AST]:
         """Allow to build the graph hierarchically"""
         assert isinstance(return_self, bool)
@@ -60,9 +62,10 @@ class AST:
         for fn in args:
             if isinstance(fn, Statement):
                 self._add_stmt(fn)
-            else:
-                assert callable(fn)
+            elif callable(fn):
                 return_val = fn(self)
+            else:
+                assert fn is None
 
         if return_self:
             assert return_val is None, "Trying to return multiple asts at the same time"
