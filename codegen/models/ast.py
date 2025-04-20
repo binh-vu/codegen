@@ -131,11 +131,11 @@ class AST:
             )
         )
 
-    def class_(self, name: str, parents: Optional[list[Expr]] = None):
+    def class_(self, name: str, parents: Optional[Sequence[Expr]] = None):
         """Define a class."""
         return self._add_stmt(DefClassStatement(name, parents or []))
 
-    def interface(self, name: str, parents: Optional[list[Expr]] = None):
+    def interface(self, name: str, parents: Optional[Sequence[Expr]] = None):
         """Define a class."""
         return self._add_stmt(DefInterfaceStatement(name, parents or []))
 

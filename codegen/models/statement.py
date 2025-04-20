@@ -139,7 +139,7 @@ class DefFuncStatement(Statement):
 @dataclass
 class DefClassStatement(Statement):
     name: str
-    parents: list[Expr] = field(default_factory=list)
+    parents: Sequence[Expr] = field(default_factory=list)
 
     def to_python(self):
         if len(self.parents) == 0:
@@ -158,7 +158,7 @@ class DefClassStatement(Statement):
 @dataclass
 class DefInterfaceStatement(Statement):
     name: str
-    parents: list[Expr] = field(default_factory=list)
+    parents: Sequence[Expr] = field(default_factory=list)
 
     def to_python(self):
         raise ValueError("Python does not have interfaces")
