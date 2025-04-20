@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Sequence
 
 from codegen.models.expr import ExceptionExpr, Expr
 from codegen.models.statement import (
     AssignStatement,
     BlockStatement,
     Comment,
+    DefClassLikeStatement,
     DefClassStatement,
     DefClassVarStatement,
     DefFuncStatement,
-    DefInterfaceStatement,
     ElseStatement,
     ExceptionStatement,
     ForLoopStatement,
@@ -135,9 +135,14 @@ class AST:
         """Define a class."""
         return self._add_stmt(DefClassStatement(name, parents or []))
 
-    def interface(self, name: str, parents: Optional[Sequence[Expr]] = None):
-        """Define a class."""
-        return self._add_stmt(DefInterfaceStatement(name, parents or []))
+    def class_like(
+        self,
+        keyword: Literal["interface", "enum"],
+        name: str,
+        parents: Optional[Sequence[Expr]] = None,
+    ):
+        """Define a class-like structure such as enum or interface in Typescript."""
+        return self._add_stmt(DefClassLikeStatement(keyword, name, parents or []))
 
     def expr(self, expr: Expr):
         return self._add_stmt(SingleExprStatement(expr))

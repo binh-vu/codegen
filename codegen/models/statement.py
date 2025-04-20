@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from multiprocessing import Value
-from typing import Optional, Sequence
+from typing import Literal, Optional, Sequence
 
 from codegen.models.expr import ExceptionExpr, Expr, ExprFuncCall
 from codegen.models.var import Var
@@ -156,7 +156,10 @@ class DefClassStatement(Statement):
 
 
 @dataclass
-class DefInterfaceStatement(Statement):
+class DefClassLikeStatement(Statement):
+    """Statement to define a class or interface"""
+
+    keyword: Literal["interface", "enum"]
     name: str
     parents: Sequence[Expr] = field(default_factory=list)
 
@@ -169,7 +172,7 @@ class DefInterfaceStatement(Statement):
             extend = f" extends {' '.join(p.to_typescript() for p in self.parents)}"
         else:
             extend = ""
-        return f"export interface {self.name}" + extend
+        return f"export {self.keyword} {self.name}" + extend
 
 
 @dataclass
