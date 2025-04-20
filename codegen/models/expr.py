@@ -231,6 +231,19 @@ class ExprDivision(Expr):
         return f"{self.left.to_python()} / {self.right.to_python()}"
 
 
+@dataclass
+class ExprTernary(Expr):
+    condition: Expr
+    true_expr: Expr
+    false_expr: Expr
+
+    def to_python(self):
+        return f"{self.true_expr.to_python()} if {self.condition.to_python()} else {self.false_expr.to_python()}"
+
+    def to_typescript(self):
+        return f"{self.true_expr.to_typescript()} ? {self.condition.to_typescript()} : {self.false_expr.to_typescript()}"
+
+
 class PredefinedFn:
     @dataclass
     class is_null(Expr):
