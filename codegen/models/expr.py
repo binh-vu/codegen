@@ -266,6 +266,9 @@ class PredefinedFn:
         def to_python(self):
             return f"[{', '.join([item.to_python() for item in self.items])}]"
 
+        def to_typescript(self):
+            return f"[{', '.join([item.to_typescript() for item in self.items])}]"
+
     @dataclass
     class dict(Expr):
         items: Sequence[tuple[Expr, Expr]]
