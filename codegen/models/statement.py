@@ -100,7 +100,7 @@ class DefFuncStatement(Statement):
             sig = "async " + sig
         sig = sig + ":"
         if self.is_static:
-            sig = "static " + sig
+            sig = "@staticmethod\n" + sig
         if self.comment != "":
             sig = (
                 sig
@@ -185,6 +185,8 @@ class DefClassVarStatement(Statement):
     type: Optional[str]
     # value of the variable
     value: Optional[Expr] = None
+    # whether this variable is static
+    is_static: bool = False
 
     def to_python(self):
         if self.type is None:
@@ -196,10 +198,20 @@ class DefClassVarStatement(Statement):
         return f"{self.name}: {self.type} = {self.value.to_python()}"
 
     def to_typescript(self):
-        assert self.type is not None
+        mod = ""
+        if self.is_static:
+            mod = "static "
+        else:
+            # static variable don't require type
+            assert self.type is not None
+        if self.type is not None:
+            type = f": {self.type}"
+        else:
+            type = ""
+
         if self.value is None:
-            return f"{self.name}: {self.type};"
-        return f"{self.name}: {self.type} = {self.value.to_typescript()};"
+            return f"{mod}{self.name}{type};"
+        return f"{mod}{self.name}{type} = {self.value.to_typescript()};"
 
 
 @dataclass
