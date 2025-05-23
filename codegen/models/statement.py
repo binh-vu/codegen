@@ -254,6 +254,24 @@ class ExceptionStatement(Statement):
 
 
 @dataclass
+class AssertionStatement(Statement):
+    expr: Expr
+    error_msg: Optional[Expr] = None
+
+    def to_python(self):
+        if self.error_msg:
+            return f"assert {self.expr.to_python()}, {self.error_msg.to_python()}"
+        return f"assert {self.expr.to_python()}"
+
+    def to_typescript(self):
+        if self.error_msg:
+            return f"if (!({self.expr.to_typescript()})) throw new Error({self.error_msg.to_typescript()});"
+        return (
+            f"if (!({self.expr.to_typescript()})) throw new Error('Assertion failed');"
+        )
+
+
+@dataclass
 class ForLoopStatement(Statement):
     item: Var
     iter: Expr
