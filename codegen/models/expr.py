@@ -219,6 +219,8 @@ class ExprNegation(Expr):
     expr: Expr
 
     def to_python(self):
+        if isinstance(self.expr, ExprIs):
+            return f"{self.expr.left.to_python()} is not {self.expr.right.to_python()}"
         return f"not {self.expr.to_wrapped_python()}"
 
 
