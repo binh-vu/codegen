@@ -129,6 +129,17 @@ class ExprRawPython(Expr):
 
 
 @dataclass
+class ExprRawTypescript(Expr):
+    code: str
+
+    def to_python(self):
+        raise NotImplementedError("Raw Typescript cannot be converted to Python")
+
+    def to_typescript(self):
+        return self.code
+
+
+@dataclass
 class ExprVar(Expr):  # a special identifier
     var: Var
 
