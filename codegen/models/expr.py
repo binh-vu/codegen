@@ -254,7 +254,7 @@ class ExprTernary(Expr):
         return f"{self.true_expr.to_python()} if {self.condition.to_python()} else {self.false_expr.to_python()}"
 
     def to_typescript(self):
-        return f"{self.true_expr.to_typescript()} ? {self.condition.to_typescript()} : {self.false_expr.to_typescript()}"
+        return f"{self.condition.to_typescript()} ? {self.true_expr.to_typescript()} : {self.false_expr.to_typescript()}"
 
 
 class PredefinedFn:
@@ -361,15 +361,26 @@ class PredefinedFn:
     class map_list(Expr):
         collection: Expr
         func: Expr
+        filter: Optional[Expr] = None
 
-        def __init__(self, collection: Expr, func: Callable[[ExprIdent], Expr]):
+        def __init__(
+            self,
+            collection: Expr,
+            func: Callable[[ExprIdent], Expr],
+            filter: Optional[Callable[[ExprIdent], Expr]] = None,
+        ):
             self.collection = collection
             self.func = func(ExprIdent("_x"))
+            self.filter = filter(ExprIdent("_x")) if filter is not None else None
 
         def to_python(self):
+            if self.filter is not None:
+                return f"[{self.func.to_python()} for _x in {self.collection.to_python()} if {self.filter.to_python()}]"
             return f"[{self.func.to_python()} for _x in {self.collection.to_python()}]"
 
         def to_typescript(self):
+            if self.filter is not None:
+                return f"{self.collection.to_typescript()}.filter((_x: any) => {self.filter.to_typescript()}).map((_x: any) => {self.func.to_typescript()})"
             return f"{self.collection.to_typescript()}.map((_x: any) => {self.func.to_typescript()})"
 
     @dataclass
