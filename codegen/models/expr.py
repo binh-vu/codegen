@@ -236,6 +236,28 @@ class ExprNegation(Expr):
 
 
 @dataclass
+class ExprLogicalAnd(Expr):
+    terms: Sequence[Expr]
+
+    def to_python(self):
+        return f" and ".join([term.to_python() for term in self.terms])
+
+    def to_typescript(self):
+        return f" && ".join([term.to_typescript() for term in self.terms])
+
+
+@dataclass
+class ExprLogicalOr(Expr):
+    terms: Sequence[Expr]
+
+    def to_python(self):
+        return f" or ".join([term.to_python() for term in self.terms])
+
+    def to_typescript(self):
+        return f" || ".join([term.to_typescript() for term in self.terms])
+
+
+@dataclass
 class ExprDivision(Expr):
     left: Expr
     right: Expr
