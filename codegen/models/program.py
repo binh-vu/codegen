@@ -155,3 +155,17 @@ class VarRegisters:
         if matched_regid is None:
             return None
         return self.registers[matched_regid]
+
+
+@dataclass
+class ImportHelper:
+    """Helper class to manage imports in the program."""
+
+    program: Program
+    # mapping from identifiers to their imported paths
+    idents: dict[str, str] = field(default_factory=dict)
+
+    def use(self, ident: str):
+        assert ident in self.idents
+        self.program.import_(self.idents[ident], True)
+        return ExprIdent(ident)

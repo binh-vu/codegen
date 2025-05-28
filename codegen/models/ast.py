@@ -7,6 +7,7 @@ from codegen.models.expr import ExceptionExpr, Expr
 from codegen.models.statement import (
     AssignStatement,
     BlockStatement,
+    CatchStatement,
     Comment,
     DefClassLikeStatement,
     DefClassStatement,
@@ -23,6 +24,7 @@ from codegen.models.statement import (
     ReturnStatement,
     SingleExprStatement,
     Statement,
+    TryStatement,
 )
 from codegen.models.types import AST_ID
 from codegen.models.var import DeferredVar, Var, VarScope
@@ -183,9 +185,20 @@ class AST:
 
     def else_(self):
         assert len(self.children) > 0 and isinstance(
-            self.children[-1].stmt, IfStatement
+            self.children[-1].stmt, (IfStatement, CatchStatement)
         )
         return self._add_stmt(ElseStatement())
+
+    def try_(self):
+        """Start a try block. The next statement must be an exception statement."""
+        return self._add_stmt(TryStatement())
+
+    def catch(self, match: Optional[Expr] = None):
+        return self._add_stmt(
+            CatchStatement(
+                match,
+            )
+        )
 
     def python_stmt(self, stmt: str) -> AST:
         return self._add_stmt(PythonStatement(stmt))

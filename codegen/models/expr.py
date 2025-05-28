@@ -160,6 +160,17 @@ class ExprFuncCall(Expr):
 
 
 @dataclass
+class ExprAwait(Expr):
+    expr: Expr
+
+    def to_python(self):
+        return f"await {self.expr.to_python()}"
+
+    def to_typescript(self):
+        return f"await {self.expr.to_typescript()}"
+
+
+@dataclass
 class ExprNewInstance(Expr):
     class_name: Expr
     args: Sequence[Expr]

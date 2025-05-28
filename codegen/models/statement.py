@@ -315,6 +315,22 @@ class IfStatement(Statement):
 
 
 @dataclass
+class TryStatement(Statement):
+    def to_python(self):
+        return "try:"
+
+
+@dataclass
+class CatchStatement(Statement):
+    match: Optional[Expr] = None
+
+    def to_python(self):
+        if self.match is None:
+            return "except:"
+        return f"except {self.match.to_python()}:"
+
+
+@dataclass
 class ElseStatement(Statement):
     def to_python(self):
         return "else:"
