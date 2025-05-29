@@ -164,10 +164,10 @@ class ExprAwait(Expr):
     expr: Expr
 
     def to_python(self):
-        return f"await {self.expr.to_python()}"
+        return f"(await {self.expr.to_python()})"
 
     def to_typescript(self):
-        return f"await {self.expr.to_typescript()}"
+        return f"(await {self.expr.to_typescript()})"
 
 
 @dataclass

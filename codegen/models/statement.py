@@ -239,7 +239,11 @@ class SingleExprStatement(Statement):
     expr: Expr
 
     def to_python(self):
-        return self.expr.to_python()
+        stmt = self.expr.to_python()
+        if stmt[0] == "(" and stmt[-1] == ")":
+            # remove parentheses if they are not needed
+            stmt = stmt[1:-1]
+        return stmt
 
     def to_typescript(self):
         return self.expr.to_typescript()
