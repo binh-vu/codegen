@@ -80,7 +80,7 @@ class ImportStatement(Statement):
                 return f"import {{ {attr} as {self.alias} }}  from '{module}';"
             return f"import {{ {attr} }} from '{module}';"
         else:
-            raise NotImplementedError()
+            raise NotImplementedError(self)
 
 
 @dataclass
@@ -202,8 +202,8 @@ class DefClassVarStatement(Statement):
         if self.is_static:
             mod = "static "
         else:
-            # static variable don't require type
-            assert self.type is not None
+            # static variable don't require type, but non-static do
+            assert self.type is not None, self
         if self.type is not None:
             type = f": {self.type}"
         else:
@@ -212,6 +212,24 @@ class DefClassVarStatement(Statement):
         if self.value is None:
             return f"{mod}{self.name}{type};"
         return f"{mod}{self.name}{type} = {self.value.to_typescript()};"
+
+
+@dataclass
+class DefEnumValueStatement(Statement):
+    """Statement to define an enum value"""
+
+    # name of the variable
+    name: str
+    # value of the variable
+    value: Optional[Expr] = None
+
+    def to_python(self):
+        raise NotImplementedError()
+
+    def to_typescript(self):
+        if self.value is None:
+            return f"{self.name},"
+        return f"{self.name} = {self.value.to_typescript()},"
 
 
 @dataclass
