@@ -166,6 +166,6 @@ class ImportHelper:
     idents: dict[str, str] = field(default_factory=dict)
 
     def use(self, ident: str):
-        assert ident in self.idents
+        assert ident in self.idents, ident
         self.program.import_(self.idents[ident], True)
         return ExprIdent(ident)
