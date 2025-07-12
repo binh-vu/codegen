@@ -205,6 +205,9 @@ class ExprNotEqual(Expr):
     def to_python(self):
         return f"{self.left.to_python()} != {self.right.to_python()}"
 
+    def to_typescript(self):
+        return f"{self.left.to_typescript()} !== {self.right.to_typescript()}"
+
 
 @dataclass
 class ExprLessThanOrEqual(Expr):
