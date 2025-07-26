@@ -101,6 +101,7 @@ class AST:
         return_type: Optional[Expr] = None,
         is_async: bool = False,
         is_static: bool = False,
+        modifiers: Optional[Sequence[Literal["get", "set"]]] = None,
         comment: str = "",
     ):
         """Define a function. The input variables are deferred vars as they are created for this function (i.e., must not be predefined prior to this function)"""
@@ -115,6 +116,7 @@ class AST:
                     var.name, var.key, grandchild_id, var.force_name, var.type
                 )
             )
+
         return self._add_stmt(
             DefFuncStatement(
                 name,
@@ -129,6 +131,7 @@ class AST:
                 return_type,
                 is_async,
                 is_static,
+                modifiers or [],
                 comment,
             )
         )

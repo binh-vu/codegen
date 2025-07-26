@@ -90,6 +90,9 @@ class DefFuncStatement(Statement):
     return_type: Optional[Expr] = None
     is_async: bool = False
     is_static: bool = False
+    # modifiers to the function such as get or set, usually appear after the static, function definition, async keywords.
+    # to mark this function as a getter or setter.
+    modifiers: Sequence[Literal["get", "set"]] = field(default_factory=list)
     comment: str = ""
 
     def to_python(self):
@@ -99,6 +102,7 @@ class DefFuncStatement(Statement):
         if self.is_async:
             sig = "async " + sig
         sig = sig + ":"
+
         if self.is_static:
             sig = "@staticmethod\n" + sig
         if self.comment != "":
@@ -120,6 +124,9 @@ class DefFuncStatement(Statement):
 
         if self.is_static:
             keyword += "static "
+
+        if len(self.modifiers) > 0:
+            keyword += " ".join(self.modifiers) + " "
 
         sig = (
             keyword
