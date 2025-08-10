@@ -309,6 +309,13 @@ class PredefinedFn:
             return f"({', '.join([item.to_python() for item in self.items])})"
 
     @dataclass
+    class set(Expr):
+        items: Sequence[Expr]
+
+        def to_python(self):
+            return f"{{{', '.join([item.to_python() for item in self.items])}}}"
+
+    @dataclass
     class list(Expr):
         items: Sequence[Expr]
 
