@@ -6,7 +6,7 @@ from typing import Optional
 
 from codegen.models.ast import AST
 from codegen.models.expr import ExprIdent  # You may need to adjust this import path
-from codegen.models.statement import BlockStatement
+from codegen.models.statement import BlockStatement, IfStatement
 from codegen.models.types import AST_ID, KEY
 from codegen.models.var import Var, VarScope
 
@@ -169,3 +169,23 @@ class ImportHelper:
         assert ident in self.idents, ident
         self.program.import_(self.idents[ident], True)
         return ExprIdent(ident)
+
+    def python_import_for_hint(
+        self, module: str, is_import_attr: bool, alias: Optional[str] = None
+    ):
+        """A specific function only for Python to import identifiers that causing circular import error into a same TYPE_CHECKING condition"""
+        if module in self.program.imported_modules:
+            return
+        self.program.imported_modules.add(module)
+
+        self.program.import_("typing.TYPE_CHECKING", True)
+        for child in self.program.import_area.children:
+            if isinstance(child.stmt, IfStatement) and child.stmt.cond == ExprIdent(
+                "TYPE_CHECKING"
+            ):
+                child.import_(module, is_import_attr, alias)
+                break
+        else:
+            self.program.import_area.if_(ExprIdent("TYPE_CHECKING"))(
+                lambda ast: ast.import_(module, is_import_attr, alias)
+            )
