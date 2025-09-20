@@ -306,6 +306,8 @@ class PredefinedFn:
         items: Sequence[Expr]
 
         def to_python(self):
+            if len(self.items) == 1:
+                return f"({self.items[0].to_python()},)"
             return f"({', '.join([item.to_python() for item in self.items])})"
 
     @dataclass
