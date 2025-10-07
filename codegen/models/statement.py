@@ -96,7 +96,7 @@ class DefFuncStatement(Statement):
     comment: str = ""
 
     def to_python(self):
-        sig = f"def {self.name}({', '.join([arg[0].to_python() + " = " + arg[1].to_python() if isinstance(arg, tuple) else arg.to_python() for arg in self.args])})"
+        sig = f"def {self.name}({', '.join([arg[0].to_python() + ' = ' + arg[1].to_python() if isinstance(arg, tuple) else arg.to_python() for arg in self.args])})"
         if self.return_type is not None:
             sig += f" -> {self.return_type.to_python()}"
         if self.is_async:
@@ -130,7 +130,7 @@ class DefFuncStatement(Statement):
 
         sig = (
             keyword
-            + f"{self.name}({', '.join([arg[0].to_typescript() + " = " + arg[1].to_typescript() if isinstance(arg, tuple) else arg.to_typescript() for arg in self.args])})"
+            + f"{self.name}({', '.join([arg[0].to_typescript() + ' = ' + arg[1].to_typescript() if isinstance(arg, tuple) else arg.to_typescript() for arg in self.args])})"
         )
         if self.return_type is not None:
             sig += f": {self.return_type.to_typescript()}"
