@@ -342,6 +342,9 @@ class IfStatement(Statement):
     def to_python(self):
         return f"if {self.cond.to_python()}:"
 
+    def to_typescript(self):
+        return f"if ({self.cond.to_typescript()})"
+
 
 @dataclass
 class TryStatement(Statement):
@@ -363,6 +366,9 @@ class CatchStatement(Statement):
 class ElseStatement(Statement):
     def to_python(self):
         return "else:"
+
+    def to_typescript(self):
+        return "else"
 
 
 @dataclass
