@@ -71,6 +71,10 @@ class ExprConstant(Expr):
                 + ", ".join(sorted((ExprConstant.constant_to_python(v) for v in val)))
                 + "}"
             )
+        if isinstance(val, tuple):
+            return (
+                "(" + ", ".join([ExprConstant.constant_to_python(v) for v in val]) + ")"
+            )
         raise NotImplementedError()
 
     @staticmethod
