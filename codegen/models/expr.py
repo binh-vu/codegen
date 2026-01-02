@@ -17,7 +17,7 @@ class Expr(ABC):
         raise NotImplementedError(self.__class__)
 
     def to_wrapped_python(self):
-        if isinstance(self, (ExprVar, ExprConstant)):
+        if isinstance(self, (ExprVar, ExprConstant, ExprIdent)):
             return self.to_python()
         return f"({self.to_python()})"
 
