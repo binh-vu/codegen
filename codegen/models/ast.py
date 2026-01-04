@@ -97,7 +97,7 @@ class AST:
     def func(
         self,
         name: str,
-        vars: Sequence[DeferredVar | tuple[DeferredVar, Expr]],
+        vars: Sequence[Optional[DeferredVar] | tuple[DeferredVar, Expr]],
         return_type: Optional[Expr] = None,
         is_async: bool = False,
         is_static: bool = False,
@@ -107,6 +107,9 @@ class AST:
         """Define a function. The input variables are deferred vars as they are created for this function (i.e., must not be predefined prior to this function)"""
         grandchild_id = self.next_grandchild_id()
         for vararg in vars:
+            if vararg is None:
+                continue
+
             if isinstance(vararg, tuple):
                 var = vararg[0]
             else:
@@ -127,6 +130,7 @@ class AST:
                         else var.get_var()
                     )
                     for var in vars
+                    if var is not None
                 ],
                 return_type,
                 is_async,
@@ -173,9 +177,9 @@ class AST:
 
     def for_loop(self, item: DeferredVar, iter: Expr):
         """When we construct a for-loop, the item (or var) is always declared. We don't allow reassigning the variable in the for-loop."""
-        assert (
-            isinstance(item, DeferredVar) and item.has_not_been_created()
-        ), "The item must be a new variable"
+        assert isinstance(item, DeferredVar) and item.has_not_been_created(), (
+            "The item must be a new variable"
+        )
         var = self.prog.create_var(
             item.name, item.key, self.next_grandchild_id(), item.force_name
         )
