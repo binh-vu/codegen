@@ -1,19 +1,20 @@
-[tool.poetry]
+[project]
 name = "codegen-2"
 version = "2.15.6"
 description = "Meta-programming"
-authors = ["Binh Vu <binh@toan2.com>"]
-license = "MIT"
+authors = [{ name = "Binh Vu", email = "binh@toan2.com" }]
+license = { text = "MIT" }
 readme = "README.md"
-packages = [{ include = "codegen" }]
+requires-python = ">=3.11"
+dependencies = []
 
-[tool.poetry.dependencies]
-python = "^3.11"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.0.0"
-autoflake = "^2.2.1"
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0", "autoflake>=2.2.1"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv-build"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "codegen"
+module-root = ""
