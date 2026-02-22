@@ -14,15 +14,13 @@ jobs:
           python-version: 3.11
       - name: setup dependencies
         run: |
-          pip install poetry twine
-          poetry install
+          pip install uv twine
+          uv sync
       #   - name: run test
-      #     run: poetry run pytest -x
+      #     run: uv run pytest -x
       - name: publish
-        # use twine for now as poetry hasn't released --skip-existing option yet
-        # run: poetry publish --build --username $PYPI_USER --password $PYPI_PWD
         run: |
-          poetry build
+          uv build
           twine upload --skip-existing dist/* -u $PYPI_USER -p $PYPI_PWD
         env:
           PYPI_USER: __token__
