@@ -110,7 +110,7 @@ class ExprConstant(Expr):
                 + ", ".join([ExprConstant.constant_to_typescript(v) for v in val])
                 + "])"
             )
-        raise NotImplementedError()
+        raise NotImplementedError(f"Cannot convert {val} to typescript")
 
 
 @dataclass

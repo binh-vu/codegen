@@ -1,6 +1,6 @@
 [project]
 name = "codegen-2"
-version = "2.15.6"
+version = "2.15.7"
 description = "Meta-programming"
 authors = [{ name = "Binh Vu", email = "binh@toan2.com" }]
 license = { text = "MIT" }
