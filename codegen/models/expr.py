@@ -87,7 +87,7 @@ class ExprConstant(Expr):
             return "null"
         if isinstance(val, (str, int, float)):
             return json.dumps(val)
-        if isinstance(val, list):
+        if isinstance(val, (list, tuple)):
             return (
                 "["
                 + ", ".join([ExprConstant.constant_to_typescript(v) for v in val])
